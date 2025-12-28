@@ -38,10 +38,22 @@ class CategoriesAdapter(
         holder.count.text = "${category.skills.size} навыков"
 
         holder.itemView.setOnClickListener {
-            listener.onCategoryClick(category)
+            // Анимация при клике
+            holder.itemView.animate()
+                .scaleX(0.95f)
+                .scaleY(0.95f)
+                .setDuration(100)
+                .withEndAction {
+                    holder.itemView.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(100)
+                        .start()
+                    listener.onCategoryClick(category)
+                }
+                .start()
         }
 
-        // Установите цвет фона
         holder.itemView.setBackgroundColor(
             holder.itemView.context.getColor(category.colorResId)
         )

@@ -39,10 +39,7 @@ class AllSkillsFragment : Fragment() {
         skillsRepository = SkillsRepository(requireContext())
         recyclerView = view.findViewById(R.id.recyclerView)
 
-        // Получаем все навыки
         allSkills = skillsRepository.getAllSkills()
-
-        // Настройка RecyclerView
         setupRecyclerView()
     }
 
@@ -54,7 +51,6 @@ class AllSkillsFragment : Fragment() {
             allSkills,
             object : SkillsAdapter.OnSkillClickListener {
                 override fun onSkillClick(skill: Skill) {
-                    // Передаем выбранный навык в диалог
                     (parentFragment as? com.example.skillexchange.SkillSelectionDialog)?.onSkillSelected(skill)
                 }
             },

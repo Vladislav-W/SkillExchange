@@ -12,13 +12,17 @@ import com.example.skillexchange.data.models.Skill
 import com.example.skillexchange.data.models.SkillCategory
 import com.example.skillexchange.data.repository.SkillsRepository
 import com.example.skillexchange.ui.adapters.CategoriesAdapter
+import com.example.skillexchange.ui.adapters.SkillsAdapter
 
 class CategoriesFragment : Fragment() {
 
     private lateinit var skillsRepository: SkillsRepository
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: CategoriesAdapter
+    private lateinit var categoriesAdapter: CategoriesAdapter
+    private lateinit var skillsAdapter: SkillsAdapter
     private var categories = listOf<SkillCategory>()
+    private var isShowingSkills = false
+    private var currentCategory: SkillCategory? = null
 
     companion object {
         fun newInstance(): CategoriesFragment {
@@ -40,10 +44,7 @@ class CategoriesFragment : Fragment() {
         skillsRepository = SkillsRepository(requireContext())
         recyclerView = view.findViewById(R.id.recyclerView)
 
-        // Получаем все категории
         categories = skillsRepository.getAllCategories()
-
-        // Настройка RecyclerView
         setupRecyclerView()
     }
 
@@ -51,17 +52,35 @@ class CategoriesFragment : Fragment() {
         val layoutManager = GridLayoutManager(requireContext(), 2)
         recyclerView.layoutManager = layoutManager
 
-        adapter = CategoriesAdapter(categories, object : CategoriesAdapter.OnCategoryClickListener {
+        categoriesAdapter = CategoriesAdapter(categories, object : CategoriesAdapter.OnCategoryClickListener {
             override fun onCategoryClick(category: SkillCategory) {
-                // При клике на категорию можно показать навыки этой категории
-                // Пока просто игнорируем
+                showSkillsForCategory(category)
             }
         })
 
-        recyclerView.adapter = adapter
+        recyclerView.adapter = categoriesAdapter
+    }
+
+    private fun showSkillsForCategory(category: SkillCategory) {
+        isShowingSkills = true
+        currentCategory = category
+
+        skillsAdapter = SkillsAdapter(
+            category.skills,
+            object : SkillsAdapter.OnSkillClickListener {
+                override fun onSkillClick(skill: Skill) {
+                    (parentFragment as? com.example.skillexchange.SkillSelectionDialog)?.onSkillSelected(skill)
+                }
+            },
+            { skill -> (parentFragment as? com.example.skillexchange.SkillSelectionDialog)?.isSkillSelected(skill) ?: false }
+        )
+
+        recyclerView.adapter = skillsAdapter
     }
 
     fun notifySkillUnselected(skill: Skill) {
-        // В этой версии ничего не делаем
+        if (isShowingSkills) {
+            skillsAdapter.notifyItemChanged(skill)
+        }
     }
 }

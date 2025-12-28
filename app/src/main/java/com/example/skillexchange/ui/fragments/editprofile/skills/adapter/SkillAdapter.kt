@@ -37,12 +37,24 @@ class SkillsAdapter(
         holder.icon.setImageResource(skill.iconResId)
         holder.name.text = skill.name
 
-        // Подсветка выбранного навыка
         val selected = isSelected(skill)
         holder.selectedOverlay.visibility = if (selected) View.VISIBLE else View.GONE
 
         holder.itemView.setOnClickListener {
-            listener.onSkillClick(skill)
+            // Анимация при клике
+            holder.itemView.animate()
+                .scaleX(0.9f)
+                .scaleY(0.9f)
+                .setDuration(100)
+                .withEndAction {
+                    holder.itemView.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(100)
+                        .start()
+                    listener.onSkillClick(skill)
+                }
+                .start()
         }
     }
 

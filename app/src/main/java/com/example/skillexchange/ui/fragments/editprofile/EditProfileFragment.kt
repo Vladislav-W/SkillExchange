@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.skillexchange.R
+import com.example.skillexchange.SkillSelectionDialog
 import com.example.skillexchange.data.models.Skill
 import com.example.skillexchange.data.models.User
 import com.example.skillexchange.data.repository.SkillsRepository
@@ -41,7 +42,7 @@ class EditProfileFragment : Fragment() {
     private lateinit var btnCancel: Button
     private lateinit var progressBar: ProgressBar
 
-    // Выбранные навыки (пока пустой список)
+    // Выбранные навыки
     private val selectedSkills = mutableListOf<Skill>()
 
     override fun onCreateView(
@@ -56,7 +57,7 @@ class EditProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = Firebase.auth
-        skillsRepository = SkillsRepository(requireContext()) // Инициализируем здесь
+        skillsRepository = SkillsRepository(requireContext())
 
         // Инициализация UI элементов
         etName = view.findViewById(R.id.etName)
@@ -68,9 +69,14 @@ class EditProfileFragment : Fragment() {
         btnCancel = view.findViewById(R.id.btnCancel)
         progressBar = view.findViewById(R.id.progressBar)
 
-        // Временно отключаем кнопку выбора навыков
-        btnSelectSkills.isEnabled = false
-        btnSelectSkills.text = "Навыки (скоро)"
+        // Активируем кнопку выбора навыков
+        btnSelectSkills.isEnabled = true
+        btnSelectSkills.text = "Выбрать навыки"
+
+        // Обработчик для кнопки выбора навыков
+        btnSelectSkills.setOnClickListener {
+            showSkillSelectionDialog()
+        }
 
         // Загружаем текущие данные пользователя
         loadCurrentUserData()
@@ -81,16 +87,30 @@ class EditProfileFragment : Fragment() {
         }
 
         btnCancel.setOnClickListener {
-            // Возврат назад
             findNavController().popBackStack()
         }
+    }
+
+    private fun showSkillSelectionDialog() {
+        val dialog = SkillSelectionDialog().apply {
+            setInitialSelectedSkills(selectedSkills)
+
+            setSkillSelectionListener(object : SkillSelectionDialog.SkillSelectionListener {
+                override fun onSkillsSelected(selectedSkills: List<Skill>) {
+                    this@EditProfileFragment.selectedSkills.clear()
+                    this@EditProfileFragment.selectedSkills.addAll(selectedSkills)
+                    updateSkillsUI()
+                }
+            })
+        }
+
+        dialog.show(parentFragmentManager, "SkillSelectionDialog")
     }
 
     private fun loadCurrentUserData() {
         val currentUser = auth.currentUser
 
         if (currentUser == null) {
-            // Пользователь не авторизован - возвращаемся назад
             findNavController().popBackStack()
             return
         }
@@ -100,12 +120,9 @@ class EditProfileFragment : Fragment() {
                 val userData = userRepository.getUser(currentUser.uid)
 
                 if (userData != null) {
-                    // Заполняем поля текущими данными
                     etName.setText(userData.name)
                     etBio.setText(userData.bio)
-
-                    // Временно: загружаем навыки как строки (будет заменено)
-                    loadSelectedSkillsAsStrings(userData.skills)
+                    loadSelectedSkills(userData.skills)
                 }
             } catch (e: Exception) {
                 // Продолжаем с пустыми полями
@@ -113,30 +130,36 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    private fun loadSelectedSkillsAsStrings(skillIds: List<String>) {
-        // Временная функция - просто показываем ID как текст
-        updateSkillsUI(skillIds)
+    private suspend fun loadSelectedSkills(skillIds: List<String>) {
+        selectedSkills.clear()
+
+        skillIds.forEach { skillId ->
+            val skill = skillsRepository.getSkill(skillId)
+            if (skill != null) {
+                selectedSkills.add(skill)
+            }
+        }
+
+        updateSkillsUI()
     }
 
-    private fun updateSkillsUI(skillNames: List<String> = emptyList()) {
+    private fun updateSkillsUI() {
         chipGroupSkills.removeAllViews()
 
-        // Добавляем чипы для каждого навыка
-        skillNames.forEach { skillName ->
+        selectedSkills.forEach { skill ->
             val chip = Chip(requireContext()).apply {
-                text = skillName
+                text = skill.name
                 isCloseIconVisible = true
                 setOnCloseIconClickListener {
-                    // Временно: просто удаляем из UI
-                    // Позже будем удалять из selectedSkills
+                    selectedSkills.remove(skill)
+                    updateSkillsUI()
                 }
             }
             chipGroupSkills.addView(chip)
         }
 
-        // Обновляем счетчик
-        tvSelectedSkillsCount.text = if (skillNames.isNotEmpty()) {
-            "Выбрано: ${skillNames.size} навыков"
+        tvSelectedSkillsCount.text = if (selectedSkills.isNotEmpty()) {
+            "Выбрано: ${selectedSkills.size} навыков"
         } else {
             "Навыки не выбраны"
         }
@@ -146,7 +169,6 @@ class EditProfileFragment : Fragment() {
         val name = etName.text.toString().trim()
         val bio = etBio.text.toString().trim()
 
-        // Валидация
         if (name.isEmpty()) {
             showToast("Введите имя")
             etName.requestFocus()
@@ -163,13 +185,9 @@ class EditProfileFragment : Fragment() {
 
         coroutineScope.launch {
             try {
-                // Получаем текущего пользователя
                 val currentUserData = userRepository.getUser(currentUser.uid)
+                val skillIds = selectedSkills.map { it.id }
 
-                // Временно: берем навыки из чипов (текст)
-                val skillIds = getSkillIdsFromChips()
-
-                // Создаем обновленного пользователя
                 val updatedUser = currentUserData?.copy(
                     name = name,
                     bio = bio,
@@ -182,12 +200,10 @@ class EditProfileFragment : Fragment() {
                     skills = skillIds
                 )
 
-                // Сохраняем в Firestore
                 val isSaved = userRepository.saveUser(updatedUser)
 
                 if (isSaved) {
                     showToast("Профиль успешно обновлен!")
-                    // Возвращаемся назад
                     findNavController().popBackStack()
                 } else {
                     showToast("Ошибка сохранения. Попробуйте снова.")
@@ -198,16 +214,6 @@ class EditProfileFragment : Fragment() {
                 progressBar.visibility = View.GONE
             }
         }
-    }
-
-    private fun getSkillIdsFromChips(): List<String> {
-        // Временная функция - возвращаем текст чипов как ID
-        val skillIds = mutableListOf<String>()
-        for (i in 0 until chipGroupSkills.childCount) {
-            val chip = chipGroupSkills.getChildAt(i) as Chip
-            skillIds.add(chip.text.toString())
-        }
-        return skillIds
     }
 
     private fun showToast(message: String) {

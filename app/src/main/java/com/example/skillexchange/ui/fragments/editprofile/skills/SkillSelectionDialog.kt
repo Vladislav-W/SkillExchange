@@ -18,7 +18,6 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.android.material.textfield.TextInputEditText
 
 class SkillSelectionDialog : DialogFragment() {
 
@@ -89,13 +88,6 @@ class SkillSelectionDialog : DialogFragment() {
         btnCancel.setOnClickListener {
             dismiss()
         }
-
-        // Поиск
-        val etSearch = view.findViewById<TextInputEditText>(R.id.etSearch)
-        etSearch.setOnEditorActionListener { _, _, _ ->
-            performSearch(etSearch.text.toString())
-            true
-        }
     }
 
     private fun updateSelectedSkillsUI() {
@@ -125,13 +117,8 @@ class SkillSelectionDialog : DialogFragment() {
     }
 
     private fun notifySkillUnselected(skill: Skill) {
-        // Уведомляем фрагменты об изменении
         val adapter = viewPager.adapter as? SkillsPagerAdapter
         adapter?.notifySkillUnselected(skill)
-    }
-
-    private fun performSearch(query: String) {
-        // Реализация поиска
     }
 
     fun onSkillSelected(skill: Skill) {
@@ -145,6 +132,14 @@ class SkillSelectionDialog : DialogFragment() {
 
     fun isSkillSelected(skill: Skill): Boolean {
         return selectedSkills.contains(skill)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     private inner class SkillsPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
