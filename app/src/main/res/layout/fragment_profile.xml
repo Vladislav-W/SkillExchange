@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Заголовок -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Мой профиль"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/teal_700"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Карточка с информацией -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Имя -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Имя"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tvName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Загрузка..."
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Email -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tvEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Загрузка..."
+                    android:textSize="16sp"
+                    android:layout_marginBottom="24dp" />
+
+                <!-- Рейтинг -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Рейтинг: "
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray" />
+
+                    <TextView
+                        android:id="@+id/tvRating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5.0"
+                        android:textSize="14sp"
+                        android:textColor="@color/green_500" />
+                </LinearLayout>
+
+                <!-- Завершено обменов -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Завершено обменов: "
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray" />
+
+                    <TextView
+                        android:id="@+id/tvCompletedExchanges"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Карточка с навыками -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Мои навыки"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/tvSkills"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Пока нет навыков. Добавьте первый!"
+                    android:textSize="16sp"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_rounded_light_gray"
+                    android:textColor="@android:color/darker_gray" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Карточка "О себе" -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginBottom="32dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="О себе"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/tvBio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Расскажите о себе, чтобы другие пользователи могли лучше узнать вас"
+                    android:textSize="16sp"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_rounded_light_gray"
+                    android:textColor="@android:color/darker_gray" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Кнопки -->
+        <Button
+            android:id="@+id/btnEditProfile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Редактировать профиль"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:backgroundTint="@color/teal_500"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Выйти из аккаунта"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:backgroundTint="@android:color/darker_gray" />
+
+    </LinearLayout>
+</ScrollView>

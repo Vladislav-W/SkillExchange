@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Зелёные цвета (основные) -->
+    <color name="green_100">#C8E6C9</color>
+    <color name="green_200">#A5D6A7</color>
+    <color name="green_500">#4CAF50</color>
+    <color name="green_700">#388E3C</color>
+    <color name="green_900">#1B5E20</color>
+
+    <!-- Фиолетовые цвета (из ошибки) -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+
+    <!-- Бирюзовые цвета (вторичные) -->
+    <color name="teal_100">#B2DFDB</color>
+    <color name="teal_200">#80CBC4</color>
+    <color name="teal_500">#009688</color>
+    <color name="teal_700">#00796B</color>
+    <color name="teal_900">#004D40</color>
+
+    <!-- Нейтральные цвета -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="gray_900">#FF212121</color>
+
+    <!-- Стандартные цвета Material -->
+    <color name="orange">#FF9800</color>
+    <color name="green">#4CAF50</color>
+    <color name="pink">#E91E63</color>
+    <color name="blue_grey">#607D8B</color>
+
+    <!-- Или создайте свои названия -->
+    <color name="category_programming">#6200EE</color>
+    <color name="category_design">#03DAC5</color>
+    <color name="category_languages">#FF9800</color>
+    <color name="category_business">#4CAF50</color>
+    <color name="category_creative">#E91E63</color>
+    <color name="category_technical">#607D8B</color>
+
+</resources>

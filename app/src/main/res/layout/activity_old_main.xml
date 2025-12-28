@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Заголовок -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SkillExchange"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/green_500"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Подзаголовок -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Добро пожаловать!"
+            android:textSize="20sp"
+            android:textColor="@color/teal_500"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Карточка с формой -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <!-- Имя -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ваше имя"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <EditText
+                    android:id="@+id/editTextName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Введите ваше имя"
+                    android:inputType="textPersonName"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Email -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <EditText
+                    android:id="@+id/editTextEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="example@email.com"
+                    android:inputType="textEmailAddress"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Пароль -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Пароль"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <EditText
+                    android:id="@+id/editTextPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Не менее 6 символов"
+                    android:inputType="textPassword" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Кнопка регистрации -->
+        <Button
+            android:id="@+id/buttonRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Зарегистрироваться"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/green_500"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Кнопка входа -->
+        <Button
+            android:id="@+id/buttonLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Войти"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/teal_500"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Сообщения -->
+        <TextView
+            android:id="@+id/textViewMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Статус авторизации -->
+        <TextView
+            android:id="@+id/textViewStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Не авторизован"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:textStyle="italic"
+            android:textColor="@color/teal_700" />
+
+    </LinearLayout>
+</ScrollView>
