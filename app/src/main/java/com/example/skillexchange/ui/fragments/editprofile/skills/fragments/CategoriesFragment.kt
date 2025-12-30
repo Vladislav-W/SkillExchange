@@ -18,8 +18,8 @@ class CategoriesFragment : Fragment() {
 
     private lateinit var skillsRepository: SkillsRepository
     private lateinit var recyclerView: RecyclerView
-    private lateinit var categoriesAdapter: CategoriesAdapter
-    private lateinit var skillsAdapter: SkillsAdapter
+    private var categoriesAdapter: CategoriesAdapter? = null  // Делаем nullable
+    private var skillsAdapter: SkillsAdapter? = null  // Делаем nullable
     private var categories = listOf<SkillCategory>()
     private var isShowingSkills = false
     private var currentCategory: SkillCategory? = null
@@ -69,10 +69,10 @@ class CategoriesFragment : Fragment() {
             category.skills,
             object : SkillsAdapter.OnSkillClickListener {
                 override fun onSkillClick(skill: Skill) {
-                    (parentFragment as? com.example.skillexchange.SkillSelectionDialog)?.onSkillSelected(skill)
+                    (parentFragment as? com.example.skillexchange.SkillWithLevelDialog)?.onSkillSelected(skill)
                 }
             },
-            { skill -> (parentFragment as? com.example.skillexchange.SkillSelectionDialog)?.isSkillSelected(skill) ?: false }
+            { skill -> (parentFragment as? com.example.skillexchange.SkillWithLevelDialog)?.isSkillSelected(skill) ?: false }
         )
 
         recyclerView.adapter = skillsAdapter
@@ -80,13 +80,13 @@ class CategoriesFragment : Fragment() {
 
     fun notifySkillUnselected(skill: Skill) {
         if (isShowingSkills) {
-            skillsAdapter.notifyItemChanged(skill)
+            skillsAdapter?.notifyItemChanged(skill)
         }
     }
 
     fun notifySkillChanged(skill: Skill) {
         if (isShowingSkills) {
-            skillsAdapter.notifyItemChanged(skill)
+            skillsAdapter?.notifyItemChanged(skill)
         }
     }
 }

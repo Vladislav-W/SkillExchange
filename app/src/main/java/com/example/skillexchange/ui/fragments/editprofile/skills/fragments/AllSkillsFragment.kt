@@ -16,7 +16,7 @@ class AllSkillsFragment : Fragment() {
 
     private lateinit var skillsRepository: SkillsRepository
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: SkillsAdapter
+    private var adapter: SkillsAdapter? = null  // Делаем nullable
     private var allSkills = listOf<Skill>()
 
     companion object {
@@ -51,20 +51,20 @@ class AllSkillsFragment : Fragment() {
             allSkills,
             object : SkillsAdapter.OnSkillClickListener {
                 override fun onSkillClick(skill: Skill) {
-                    (parentFragment as? com.example.skillexchange.SkillSelectionDialog)?.onSkillSelected(skill)
+                    (parentFragment as? com.example.skillexchange.SkillWithLevelDialog)?.onSkillSelected(skill)
                 }
             },
-            { skill -> (parentFragment as? com.example.skillexchange.SkillSelectionDialog)?.isSkillSelected(skill) ?: false }
+            { skill -> (parentFragment as? com.example.skillexchange.SkillWithLevelDialog)?.isSkillSelected(skill) ?: false }
         )
 
         recyclerView.adapter = adapter
     }
 
     fun notifySkillUnselected(skill: Skill) {
-        adapter.notifyItemChanged(skill)
+        adapter?.notifyItemChanged(skill)
     }
 
     fun notifySkillChanged(skill: Skill) {
-        adapter.notifyItemChanged(skill)
+        adapter?.notifyItemChanged(skill)
     }
 }

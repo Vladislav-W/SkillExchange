@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.skillexchange.R
-import com.example.skillexchange.SkillSelectionDialog
+import com.example.skillexchange.SkillWithLevelDialog
 import com.example.skillexchange.data.models.Skill
 import com.example.skillexchange.data.models.User
 import com.example.skillexchange.data.repository.SkillsRepository
@@ -42,8 +42,8 @@ class EditProfileFragment : Fragment() {
     private lateinit var btnCancel: Button
     private lateinit var progressBar: ProgressBar
 
-    // Выбранные навыки (теперь храним Skill)
-    private val selectedSkills = mutableListOf<Skill>()
+    // Выбранные навыки с уровнями
+    private val selectedSkills = mutableListOf<User.UserSkill>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,11 +92,11 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun showSkillSelectionDialog() {
-        val dialog = SkillSelectionDialog().apply {
+        val dialog = SkillWithLevelDialog().apply {
             setInitialSelectedSkills(selectedSkills)
 
-            setSkillSelectionListener(object : SkillSelectionDialog.SkillSelectionListener {
-                override fun onSkillsSelected(selectedSkills: List<Skill>) {
+            setSkillSelectionListener(object : SkillWithLevelDialog.SkillSelectionListener {
+                override fun onSkillsSelected(selectedSkills: List<User.UserSkill>) {
                     this@EditProfileFragment.selectedSkills.clear()
                     this@EditProfileFragment.selectedSkills.addAll(selectedSkills)
                     updateSkillsUI()
@@ -104,7 +104,7 @@ class EditProfileFragment : Fragment() {
             })
         }
 
-        dialog.show(parentFragmentManager, "SkillSelectionDialog")
+        dialog.show(parentFragmentManager, "SkillWithLevelDialog")
     }
 
     private fun loadCurrentUserData() {
@@ -123,8 +123,10 @@ class EditProfileFragment : Fragment() {
                     etName.setText(userData.name)
                     etBio.setText(userData.bio)
 
-                    // ИСПРАВЛЕНО: загружаем навыки из UserSkill
-                    loadSelectedSkills(userData.skills)
+                    // Загружаем навыки
+                    selectedSkills.clear()
+                    selectedSkills.addAll(userData.skills)
+                    updateSkillsUI()
                 }
             } catch (e: Exception) {
                 // Продолжаем с пустыми полями
@@ -132,32 +134,30 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    private suspend fun loadSelectedSkills(userSkills: List<User.UserSkill>) {
-        selectedSkills.clear()
-
-        userSkills.forEach { userSkill ->
-            val skill = skillsRepository.getSkill(userSkill.skillId)
-            if (skill != null) {
-                selectedSkills.add(skill)
-            }
-        }
-
-        updateSkillsUI()
-    }
-
     private fun updateSkillsUI() {
         chipGroupSkills.removeAllViews()
 
-        selectedSkills.forEach { skill ->
-            val chip = Chip(requireContext()).apply {
-                text = skill.name
-                isCloseIconVisible = true
-                setOnCloseIconClickListener {
-                    selectedSkills.remove(skill)
-                    updateSkillsUI()
+        selectedSkills.forEach { userSkill ->
+            val skill = skillsRepository.getSkill(userSkill.skillId)
+            if (skill != null) {
+                val levelText = when (userSkill.level) {
+                    "BEGINNER" -> "Начинающий"
+                    "INTERMEDIATE" -> "Средний"
+                    "ADVANCED" -> "Продвинутый"
+                    "EXPERT" -> "Эксперт"
+                    else -> "Начинающий"
                 }
+
+                val chip = Chip(requireContext()).apply {
+                    text = "${skill.name} ($levelText)"
+                    isCloseIconVisible = true
+                    setOnCloseIconClickListener {
+                        selectedSkills.remove(userSkill)
+                        updateSkillsUI()
+                    }
+                }
+                chipGroupSkills.addView(chip)
             }
-            chipGroupSkills.addView(chip)
         }
 
         tvSelectedSkillsCount.text = if (selectedSkills.isNotEmpty()) {
@@ -189,21 +189,16 @@ class EditProfileFragment : Fragment() {
             try {
                 val currentUserData = userRepository.getUser(currentUser.uid)
 
-                // ИСПРАВЛЕНО: создаем UserSkill объекты
-                val userSkills = selectedSkills.map { skill ->
-                    User.UserSkill(skillId = skill.id, level = "BEGINNER")
-                }
-
                 val updatedUser = currentUserData?.copy(
                     name = name,
                     bio = bio,
-                    skills = userSkills
+                    skills = selectedSkills
                 ) ?: User(
                     uid = currentUser.uid,
                     email = currentUser.email ?: "",
                     name = name,
                     bio = bio,
-                    skills = userSkills
+                    skills = selectedSkills
                 )
 
                 val isSaved = userRepository.saveUser(updatedUser)
