@@ -49,7 +49,7 @@ class SkillSelectionDialog : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.dialog_skill_selection, container, false)
+        return inflater.inflate(R.layout.dialog_skill_selection_fixed, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -128,6 +128,13 @@ class SkillSelectionDialog : DialogFragment() {
             selectedSkills.add(skill)
         }
         updateSelectedSkillsUI()
+        // СИНХРОННОЕ ОБНОВЛЕНИЕ адаптеров
+        notifySkillChanged(skill)
+    }
+
+    private fun notifySkillChanged(skill: Skill) {
+        val adapter = viewPager.adapter as? SkillsPagerAdapter
+        adapter?.notifySkillChanged(skill)
     }
 
     fun isSkillSelected(skill: Skill): Boolean {
@@ -138,7 +145,7 @@ class SkillSelectionDialog : DialogFragment() {
         super.onStart()
         dialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
     }
 
@@ -160,6 +167,15 @@ class SkillSelectionDialog : DialogFragment() {
                 when (index) {
                     0 -> (fragment as? CategoriesFragment)?.notifySkillUnselected(skill)
                     1 -> (fragment as? AllSkillsFragment)?.notifySkillUnselected(skill)
+                }
+            }
+        }
+
+        fun notifySkillChanged(skill: Skill) {
+            fragments.forEachIndexed { index, fragment ->
+                when (index) {
+                    0 -> (fragment as? CategoriesFragment)?.notifySkillChanged(skill)
+                    1 -> (fragment as? AllSkillsFragment)?.notifySkillChanged(skill)
                 }
             }
         }

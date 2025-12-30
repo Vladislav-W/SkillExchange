@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.skillexchange.R
 import com.example.skillexchange.data.models.User
+import com.example.skillexchange.data.repository.SkillsRepository
 import com.example.skillexchange.data.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -23,6 +24,7 @@ class ProfileFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private val userRepository = UserRepository()
+    private lateinit var skillsRepository: SkillsRepository
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     // UI элементы
@@ -40,7 +42,6 @@ class ProfileFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Используем новый макет fragment_profile.xml
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
@@ -48,8 +49,9 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = Firebase.auth
+        skillsRepository = SkillsRepository(requireContext())
 
-        // Инициализируем UI элементы (должны совпадать с fragment_profile.xml)
+        // Инициализируем UI элементы
         tvName = view.findViewById(R.id.tvName)
         tvEmail = view.findViewById(R.id.tvEmail)
         tvRating = view.findViewById(R.id.tvRating)
@@ -64,7 +66,6 @@ class ProfileFragment : Fragment() {
 
         // Настройка кнопки редактирования профиля
         btnEditProfile.setOnClickListener {
-            // Переход на экран редактирования
             findNavController().navigate(R.id.action_profileFragment_to_editProfileFragment)
         }
 
@@ -82,7 +83,7 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        // Показываем email из Firebase Auth (он всегда есть)
+        // Показываем email из Firebase Auth
         tvEmail.text = currentUser.email ?: "Email не указан"
 
         // Загружаем остальные данные из Firestore
@@ -96,9 +97,14 @@ class ProfileFragment : Fragment() {
                     tvRating.text = String.format("%.1f", userData.rating)
                     tvCompletedExchanges.text = userData.completedExchanges.toString()
 
-                    // Навыки
+                    // Навыки - ИСПРАВЛЕНО: получаем skillId из UserSkill
                     if (userData.skills.isNotEmpty()) {
-                        tvSkills.text = userData.skills.joinToString(", ")
+                        // Получаем названия навыков по ID из UserSkill
+                        val skillNames = userData.skills.mapNotNull { userSkill ->
+                            // userSkill имеет тип User.UserSkill, берем skillId
+                            skillsRepository.getSkill(userSkill.skillId)?.name
+                        }
+                        tvSkills.text = skillNames.joinToString(", ")
                     } else {
                         tvSkills.text = "Пока нет навыков. Добавьте первый!"
                     }
@@ -133,7 +139,11 @@ class ProfileFragment : Fragment() {
         auth.signOut()
         showToast("Вы вышли из аккаунта")
 
-        // MainActivity автоматически перенаправит на логин через AuthStateListener
+        // Явный переход на экран логина
+        findNavController().navigate(R.id.loginFragment)
+
+        // Очищаем историю навигации
+        findNavController().popBackStack(R.id.loginFragment, false)
     }
 
     private fun showToast(message: String) {

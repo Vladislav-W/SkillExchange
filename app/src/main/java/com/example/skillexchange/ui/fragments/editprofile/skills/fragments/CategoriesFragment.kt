@@ -83,4 +83,10 @@ class CategoriesFragment : Fragment() {
             skillsAdapter.notifyItemChanged(skill)
         }
     }
+
+    fun notifySkillChanged(skill: Skill) {
+        if (isShowingSkills) {
+            skillsAdapter.notifyItemChanged(skill)
+        }
+    }
 }

@@ -38,4 +38,6 @@
     <color name="category_creative">#E91E63</color>
     <color name="category_technical">#607D8B</color>
 
+    <color name="selected_skill">#E3F2FD</color>
+
 </resources>

@@ -42,7 +42,7 @@ class EditProfileFragment : Fragment() {
     private lateinit var btnCancel: Button
     private lateinit var progressBar: ProgressBar
 
-    // Выбранные навыки
+    // Выбранные навыки (теперь храним Skill)
     private val selectedSkills = mutableListOf<Skill>()
 
     override fun onCreateView(
@@ -122,6 +122,8 @@ class EditProfileFragment : Fragment() {
                 if (userData != null) {
                     etName.setText(userData.name)
                     etBio.setText(userData.bio)
+
+                    // ИСПРАВЛЕНО: загружаем навыки из UserSkill
                     loadSelectedSkills(userData.skills)
                 }
             } catch (e: Exception) {
@@ -130,11 +132,11 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    private suspend fun loadSelectedSkills(skillIds: List<String>) {
+    private suspend fun loadSelectedSkills(userSkills: List<User.UserSkill>) {
         selectedSkills.clear()
 
-        skillIds.forEach { skillId ->
-            val skill = skillsRepository.getSkill(skillId)
+        userSkills.forEach { userSkill ->
+            val skill = skillsRepository.getSkill(userSkill.skillId)
             if (skill != null) {
                 selectedSkills.add(skill)
             }
@@ -186,18 +188,22 @@ class EditProfileFragment : Fragment() {
         coroutineScope.launch {
             try {
                 val currentUserData = userRepository.getUser(currentUser.uid)
-                val skillIds = selectedSkills.map { it.id }
+
+                // ИСПРАВЛЕНО: создаем UserSkill объекты
+                val userSkills = selectedSkills.map { skill ->
+                    User.UserSkill(skillId = skill.id, level = "BEGINNER")
+                }
 
                 val updatedUser = currentUserData?.copy(
                     name = name,
                     bio = bio,
-                    skills = skillIds
+                    skills = userSkills
                 ) ?: User(
                     uid = currentUser.uid,
                     email = currentUser.email ?: "",
                     name = name,
                     bio = bio,
-                    skills = skillIds
+                    skills = userSkills
                 )
 
                 val isSaved = userRepository.saveUser(updatedUser)

@@ -63,4 +63,8 @@ class AllSkillsFragment : Fragment() {
     fun notifySkillUnselected(skill: Skill) {
         adapter.notifyItemChanged(skill)
     }
+
+    fun notifySkillChanged(skill: Skill) {
+        adapter.notifyItemChanged(skill)
+    }
 }

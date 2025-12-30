@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.skillexchange.R
 import com.example.skillexchange.data.models.Skill
@@ -23,6 +24,7 @@ class SkillsAdapter(
         val icon: ImageView = itemView.findViewById(R.id.ivIcon)
         val name: TextView = itemView.findViewById(R.id.tvName)
         val selectedOverlay: View = itemView.findViewById(R.id.selectedOverlay)
+        // Убрали skillContainer, используем сам itemView
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SkillViewHolder {
@@ -37,8 +39,9 @@ class SkillsAdapter(
         holder.icon.setImageResource(skill.iconResId)
         holder.name.text = skill.name
 
+        // ПРОВЕРКА ВЫБРАН ЛИ НАВЫК
         val selected = isSelected(skill)
-        holder.selectedOverlay.visibility = if (selected) View.VISIBLE else View.GONE
+        updateSelectionUI(holder, selected)
 
         holder.itemView.setOnClickListener {
             // Анимация при клике
@@ -55,6 +58,21 @@ class SkillsAdapter(
                     listener.onSkillClick(skill)
                 }
                 .start()
+        }
+    }
+
+    private fun updateSelectionUI(holder: SkillViewHolder, selected: Boolean) {
+        if (selected) {
+            holder.selectedOverlay.visibility = View.VISIBLE
+            // Меняем фон самого itemView
+            holder.itemView.setBackgroundColor(
+                ContextCompat.getColor(holder.itemView.context, R.color.selected_skill)
+            )
+        } else {
+            holder.selectedOverlay.visibility = View.GONE
+            holder.itemView.setBackgroundColor(
+                ContextCompat.getColor(holder.itemView.context, android.R.color.transparent)
+            )
         }
     }
 
