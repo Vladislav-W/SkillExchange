@@ -8,24 +8,20 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.skillexchange.R
-import com.example.skillexchange.data.models.User
 import com.example.skillexchange.data.repository.SkillsRepository
-import com.example.skillexchange.data.repository.UserRepository
+import com.example.skillexchange.ui.viewmodels.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
-    private val userRepository = UserRepository()
     private lateinit var skillsRepository: SkillsRepository
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val viewModel: UserViewModel by viewModels()
 
     // UI элементы
     private lateinit var tvName: TextView
@@ -51,7 +47,7 @@ class ProfileFragment : Fragment() {
         auth = Firebase.auth
         skillsRepository = SkillsRepository(requireContext())
 
-        // Инициализируем UI элементы
+        // Инициализация UI элементов
         tvName = view.findViewById(R.id.tvName)
         tvEmail = view.findViewById(R.id.tvEmail)
         tvRating = view.findViewById(R.id.tvRating)
@@ -64,14 +60,13 @@ class ProfileFragment : Fragment() {
         // Загружаем данные пользователя
         loadUserData()
 
-        // Настройка кнопки редактирования профиля
+        // Обработчики кнопок
         btnEditProfile.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_editProfileFragment)
         }
 
-        // Настройка кнопки выхода
         btnLogout.setOnClickListener {
-            logout()
+            logoutUser()
         }
     }
 
@@ -80,79 +75,71 @@ class ProfileFragment : Fragment() {
 
         if (currentUser == null) {
             showToast("Пользователь не авторизован")
+            findNavController().navigate(R.id.loginFragment)
             return
         }
 
-        // Показываем email из Firebase Auth
-        tvEmail.text = currentUser.email ?: "Email не указан"
+        // Отображаем базовые данные из Firebase Auth
+        tvName.text = currentUser.displayName ?: "Без имени"
+        tvEmail.text = currentUser.email ?: "Нет email"
 
-        // Загружаем остальные данные из Firestore
-        coroutineScope.launch {
-            try {
-                val userData = userRepository.getUser(currentUser.uid)
+        // ЗАГРУЖАЕМ ДАННЫЕ ИЗ FIRESTORE ЧЕРЕЗ VIEWMODEL
+        viewModel.loadUserData()
+        viewModel.userData.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                displayUserData(user)
+            } else {
+                // Если данных нет в Firestore, показываем сообщение
+                tvSkills.text = "Данные не загружены. Отредактируйте профиль"
+                tvBio.text = "Информация не загружена"
+            }
+        }
 
-                if (userData != null) {
-                    // Заполняем данные из Firestore
-                    tvName.text = userData.name.ifEmpty { "Без имени" }
-                    tvRating.text = String.format("%.1f", userData.rating)
-                    tvCompletedExchanges.text = userData.completedExchanges.toString()
-
-                    // Навыки - ИСПРАВЛЕНО: получаем skillId из UserSkill
-                    if (userData.skills.isNotEmpty()) {
-                        // Получаем названия навыков по ID из UserSkill
-                        val skillNames = userData.skills.mapNotNull { userSkill ->
-                            // userSkill имеет тип User.UserSkill, берем skillId
-                            skillsRepository.getSkill(userSkill.skillId)?.name
-                        }
-                        tvSkills.text = skillNames.joinToString(", ")
-                    } else {
-                        tvSkills.text = "Пока нет навыков. Добавьте первый!"
-                    }
-
-                    // О себе
-                    if (userData.bio.isNotEmpty()) {
-                        tvBio.text = userData.bio
-                    } else {
-                        tvBio.text = "Расскажите о себе, чтобы другие пользователи могли лучше узнать вас"
-                    }
-                } else {
-                    // Если пользователь есть в Auth, но нет в Firestore
-                    tvName.text = "Без имени"
-                    tvSkills.text = "Пока нет навыков"
-                    tvBio.text = "Расскажите о себе"
-
-                    // Создаем запись в Firestore
-                    val newUser = User(
-                        uid = currentUser.uid,
-                        email = currentUser.email ?: "",
-                        name = currentUser.displayName ?: currentUser.email?.substringBefore("@") ?: "User"
-                    )
-                    userRepository.saveUser(newUser)
-                }
-            } catch (e: Exception) {
-                showToast("Ошибка загрузки данных: ${e.message}")
+        // Также наблюдаем за состоянием загрузки
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isLoading) {
+                tvSkills.text = "Загрузка навыков..."
+                tvBio.text = "Загрузка информации о себе..."
             }
         }
     }
 
-    private fun logout() {
+    private fun displayUserData(user: com.example.skillexchange.data.models.User) {
+        tvName.text = user.name.ifEmpty { "Без имени" }
+        tvRating.text = user.rating.toString()
+        tvCompletedExchanges.text = user.completedExchanges.toString()
+        tvBio.text = user.bio.ifEmpty { "Пользователь пока не добавил информацию о себе" }
+
+        // Отображаем навыки
+        if (user.skills.isNotEmpty()) {
+            val skillsText = buildString {
+                user.skills.forEach { userSkill ->
+                    val skill = skillsRepository.getSkill(userSkill.skillId)
+                    if (skill != null) {
+                        val levelText = when (userSkill.level) {
+                            "BEGINNER" -> "Начинающий"
+                            "INTERMEDIATE" -> "Средний"
+                            "ADVANCED" -> "Продвинутый"
+                            "EXPERT" -> "Эксперт"
+                            else -> "Начинающий"
+                        }
+                        append("• ${skill.name} ($levelText)\n")
+                    }
+                }
+            }
+            tvSkills.text = skillsText
+        } else {
+            tvSkills.text = "Пока нет навыков. Добавьте первый!"
+        }
+    }
+
+    private fun logoutUser() {
         auth.signOut()
         showToast("Вы вышли из аккаунта")
-
-        // Явный переход на экран логина
         findNavController().navigate(R.id.loginFragment)
-
-        // Очищаем историю навигации
-        findNavController().popBackStack(R.id.loginFragment, false)
     }
 
     private fun showToast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Обновляем данные при возвращении на экран
-        loadUserData()
     }
 }

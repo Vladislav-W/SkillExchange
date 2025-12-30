@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -63,17 +64,59 @@ class MainActivity : AppCompatActivity() {
         if (user == null) {
             // Пользователь не авторизован
             bottomNavigationView.visibility = View.GONE
-            // Убедимся что на экране логина
+
+            // Если мы не на экране логина и нажимаем "Назад" - выходим из приложения
             if (navController.currentDestination?.id != R.id.loginFragment) {
-                navController.navigate(R.id.loginFragment)
+                // Создаем NavOptions для очистки стека
+                val navOptions = NavOptions.Builder()
+                    .setPopUpTo(R.id.nav_graph, true)
+                    .setLaunchSingleTop(true)
+                    .build()
+
+                navController.navigate(R.id.loginFragment, null, navOptions)
             }
         } else {
             // Пользователь авторизован
             bottomNavigationView.visibility = View.VISIBLE
-            // Если на экране логина - переходим на главную
+
+            // Если на экране логина - переходим на главную, очищая стек
             if (navController.currentDestination?.id == R.id.loginFragment) {
-                navController.navigate(R.id.homeFragment)
+                // Создаем NavOptions для очистки стека
+                val navOptions = NavOptions.Builder()
+                    .setPopUpTo(R.id.nav_graph, true)
+                    .setLaunchSingleTop(true)
+                    .build()
+
+                navController.navigate(R.id.homeFragment, null, navOptions)
             }
         }
+    }
+
+    override fun onBackPressed() {
+        val currentDestination = navController.currentDestination?.id
+
+        // Если пользователь авторизован и на главном экране
+        if (auth.currentUser != null && currentDestination == R.id.homeFragment) {
+            // Спрашиваем подтверждение выхода
+            if (isTaskRoot) { // Если это корневая активность
+                showExitConfirmationDialog()
+            } else {
+                super.onBackPressed()
+            }
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    private fun showExitConfirmationDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Выход")
+            .setMessage("Вы действительно хотите выйти из приложения?")
+            .setPositiveButton("Да") { _, _ ->
+                // Закрываем приложение
+                finishAffinity()
+            }
+            .setNegativeButton("Нет", null)
+            .show()
     }
 }

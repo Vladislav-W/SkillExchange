@@ -88,18 +88,22 @@ class LoginFragment : Fragment() {
 
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
+                // Проверяем, что фрагмент ещё прикреплен к Activity
+                if (!isAdded) return@addOnCompleteListener
+
                 progressBar.visibility = View.GONE
 
                 if (task.isSuccessful) {
                     // Firebase сохранит сессию автоматически
                     // MainActivity сам переведет на homeFragment через updateUI()
                     Toast.makeText(requireContext(), "Вход выполнен!", Toast.LENGTH_SHORT).show()
-
                     // НЕ делаем navigate здесь - MainActivity сделает это через AuthStateListener
-                    // findNavController().navigate(R.id.homeFragment) // <-- УДАЛИТЬ ЭТУ СТРОКУ
                 } else {
-                    Toast.makeText(requireContext(),
-                        "Ошибка: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Ошибка: ${task.exception?.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
     }
